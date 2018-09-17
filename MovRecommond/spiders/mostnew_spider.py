@@ -1,0 +1,89 @@
+# -*- coding: utf-8 -*-
+import re
+
+import scrapy
+from scrapy.spider import BaseSpider
+from MovRecommond.items import MovieItem
+
+
+
+class MostNewSpider(BaseSpider):
+    name = "latestmovie"
+    allowed_domains = []
+    start_urls = ['http://www.ygdy8.net/html/gndy/dyzz/index.html']
+
+    def parse(self, response):
+        # 当前页面，从第一页到第4页
+        for re in response.xpath('//*[@id="header"]/div/div[3]/div[3]/div[2]/div[1]/div[1]/div/form/div[2]/input'):
+            for index in range(0, 5):
+                requestUrl = "http://www.ygdy8.net/html/gndy/dyzz/list_23_%s.html" % (index+1)
+
+                # yield
+                yield scrapy.Request(url=requestUrl, callback=self.parse_mor)
+
+    def parse_mor(self, response):
+        #
+        for item in response.xpath('//div[@class="co_content8"]//table//a'):
+            # 爬取5页，左开右闭
+            mvUrl = item.xpath("@href").extract_first()
+            mvName = item.xpath("text()").extract_first()
+            destUrl = "http://www.ygdy8.net%s" % (mvUrl)
+            print('---------------------哈哈哈哈------------------------------',destUrl)
+            yield scrapy.Request(url=destUrl, callback=self.parse_detail)
+            # yield
+
+
+            # yield
+    # 解析并保存进数据库，这里为了方便，用工具类封装了一下，便于其他爬虫用此方法
+    def parse_detail(self,response):
+        # 详情介绍页面
+        # 详情介绍页面
+        mvname = response.xpath("//div[@class='title_all']//h1/font/text()").extract()
+        # mvdesc = response.xpath("//div[@class='co_content8']//div[@id='Zoom']//text()").extract()
+        mvdesc = response.xpath("//div[@class='co_content8']//p/text()").extract()
+        if len(mvdesc):
+            print("")
+        else:
+            mvdesc = response.xpath("//div[@class='co_content8']//div[@id='Zoom']//text()").extract()
+        # 海报是个集合，包含2-3个图，一般第一个是大海报，后面的是剧照
+        if len("".join(mvdesc).strip())==0:
+            mvdesc = response.xpath("//div[@class='co_content8']//div[@id='Zoom']//text()").extract()
+
+        if len("".join(mvdesc).strip())==0:
+            return
+        mvPoster = response.xpath("//div[@class='co_content8']//p/img/@src").extract()
+        if len(mvPoster):
+            print('')
+        else:
+            mvPoster = response.xpath("//div[@class='co_content8']//div[@id='Zoom']//img/@src").extract()
+        # ftp下载
+        # 如果是电视剧，会有分集,这个是标题,是个集合，跟下载地址对应
+        mv_ftp_name = response.xpath("//div[@class='co_content8']//table//a/text()").extract()
+        # 分集的下载地址
+        mv_ftp = response.xpath("//div[@class='co_content8']//table//a/@href").extract()
+        # 更新时间
+        mv_time = response.xpath("//div[@class='co_content8']//ul/text()").extract_first().strip()
+        if len(mv_time):
+            time = re.search(r"(\d{4}-\d{1,2}-\d{1,2})", mv_time).group(0)
+        else:
+            time = "2018-07-5"
+        mvdtilte = "磁力下载"
+        # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
+        downUrlList = []
+        # 如果磁力地址不为空
+        if len(mv_ftp):
+            downUrlList.extend(mv_ftp)
+        else:
+            return
+            # 如果下载地址不为空
+
+        Item = MovieItem()
+        Item['movClass'] = '最新电影'
+        Item['downLoadName'] = mvname
+        Item['downdtitle'] = str(mvdtilte)
+        Item['downimgurl'] = str("".join(mvPoster))
+        url = ','.join(downUrlList)
+        Item['downLoadUrl'] = url
+        Item['mvdesc'] ="".join(mvdesc).strip()
+        Item['mv_update_time'] = time
+        yield Item

@@ -8,7 +8,7 @@
 #     https://doc.scrapy.org/en/latest/topics/settings.html
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
+FEED_EXPORT_ENCODING = 'utf-8'
 BOT_NAME = 'MovRecommond'
 
 SPIDER_MODULES = ['MovRecommond.spiders']
@@ -100,7 +100,7 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 #Mysql数据库的配置信息
-MYSQL_HOST = '127.0.0.1'
+MYSQL_HOST = '123.207.150.253'
 MYSQL_DBNAME = 'movie'         #数据库名字，请修改
 MYSQL_USER = 'root'             #数据库账号，请修改
 MYSQL_PASSWD = 'root'         #数据库密码，请修改

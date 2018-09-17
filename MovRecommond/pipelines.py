@@ -13,10 +13,10 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import json
+
 from twisted.enterprise import adbapi
 import pymysql
 from MovRecommond import settings
-from scrapy import log
 class MoviePipeline(object):
 
     def __init__(self):
@@ -31,37 +31,135 @@ class MoviePipeline(object):
             use_unicode=True)
         # 通过cursor执行增删查改
         self.cursor = self.connect.cursor()
-
+        print('数据库连接，----------------------------连接成功-------------------------------------')
 
     def process_item(self, item, spider):
 
-        try:
-            # 插入数据
-            # 查重处理
-            self.cursor.execute(
-                """select * from mov_rec where downLoadName = %s""",
-                item['downLoadName'])
-            # 是否有重复数据
-            repetition = self.cursor.fetchone()
+        if spider.name=='movspider':
 
-            # 重复
-            if repetition is not None:
-                #结果返回，已存在，则不插入
-                pass
-            else:
+            try:
+                # 插入数据
+                # 查重处理
                 self.cursor.execute(
-                    """insert into mov_rec(movClass, downLoadName, downLoadUrl, mvdesc,downimgurl,downdtitle )
-                    value (%s, %s, %s, %s, %s, %s)""",
-                    (item['movClass'],
-                     item['downLoadName'],
-                     item['downLoadUrl'],
-                     item['mvdesc'],
-                     item['downimgurl'],
-                     item['downdtitle']
-                     ))
-                    # 提交sql语句
-                self.connect.commit()
-        except Exception as error:
-            # 出现错误时打印错误日志
-            log(error)
-        return item
+                    """select * from mov_rec where downLoadName = %s""",
+                    item['downLoadName'])
+                # 是否有重复数据
+                repetition = self.cursor.fetchone()
+                # 重复
+                if repetition is not None:
+                    #结果返回，已存在，则不插入
+                    pass
+                else:
+                        # 提交sql语句
+                    self.cursor.execute(
+                        """insert into mov_rec(movClass, downLoadName, downLoadUrl, mvdesc,downimgurl,downdtitle,mv_update_time )
+                        value (%s, %s, %s, %s, %s, %s, %s)""",
+                        (item['movClass'],
+                         item['downLoadName'],
+                         item['downLoadUrl'],
+                         item['mvdesc'],
+                         item['downimgurl'],
+                         item['downdtitle'],
+                         item['mv_update_time']
+                         ))
+                    self.connect.commit()
+                    print('插入数据库，----------------------------插入完成-------------------------------------')
+            except Exception as error:
+                print('插入数据库，--------插入出错----------------',str(error))
+                return item
+        elif spider.name =='latestmovie':
+            try:
+                # 插入数据
+                # 查重处理
+                self.cursor.execute(
+                    """select * from mov_update where downLoadName = %s""",
+                    item['downLoadName'])
+                # 是否有重复数据
+                repetition = self.cursor.fetchone()
+                # 重复
+                if repetition is not None:
+                    #结果返回，已存在，则不插入
+                    print('插入数据库，----------------------------已存在，则不插入-------------------------------------')
+                    pass
+                else:
+                        # 提交sql语句
+                    self.cursor.execute(
+                        """insert into mov_update(movClass, downLoadName, downLoadUrl, mvdesc,downimgurl,downdtitle,mv_update_time )
+                        value (%s, %s, %s, %s, %s, %s, %s)""",
+                        (item['movClass'],
+                         item['downLoadName'],
+                         item['downLoadUrl'],
+                         item['mvdesc'],
+                         item['downimgurl'],
+                         item['downdtitle'],
+                         item['mv_update_time']
+                         ))
+                    self.connect.commit()
+                    print('插入数据库，----------------------------插入完成-------------------------------------')
+            except Exception as error:
+                print('插入数据库，--------插入出错----------------',str(error))
+                return item
+        elif spider.name=="dygangspider":
+            try:
+                # 插入数据
+                # 查重处理
+                self.cursor.execute(
+                    """select * from mov_update where downLoadName = %s""",
+                    item['downLoadName'])
+                # 是否有重复数据
+                repetition = self.cursor.fetchone()
+                # 重复
+                if repetition is not None:
+                    #结果返回，已存在，则不插入
+                    print('插入数据库，----------------------------已存在，则不插入-------------------------------------')
+                    pass
+                else:
+                        # 提交sql语句
+                    self.cursor.execute(
+                        """insert into mov_update(movClass, downLoadName, downLoadUrl, mvdesc,downimgurl,downdtitle,mv_update_time )
+                        value (%s, %s, %s, %s, %s, %s, %s)""",
+                        (item['movClass'],
+                         item['downLoadName'],
+                         item['downLoadUrl'],
+                         item['mvdesc'],
+                         item['downimgurl'],
+                         item['downdtitle'],
+                         item['mv_update_time']
+                         ))
+                    self.connect.commit()
+                    print('插入数据库，----------------------------插入完成-------------------------------------')
+            except Exception as error:
+                print('插入数据库，--------插入出错----------------',str(error))
+                return item
+        elif spider.name=="video_library_spider":
+            try:
+                # 插入数据
+                # 查重处理
+                self.cursor.execute(
+                    """select * from mov_host_library where downLoadName = %s""",
+                    item['downLoadName'])
+                # 是否有重复数据
+                repetition = self.cursor.fetchone()
+                # 重复
+                if repetition is not None:
+                    #结果返回，已存在，则不插入
+                    print('插入数据库，----------------------------已存在，则不插入-------------------------------------')
+                    pass
+                else:
+                        # 提交sql语句
+                    self.cursor.execute(
+                        """insert into mov_host_library(movClass, downLoadName, downLoadUrl, mvdesc,downimgurl,downdtitle,mv_update_time )
+                        value (%s, %s, %s, %s, %s, %s, %s)""",
+                        (item['movClass'],
+                         item['downLoadName'],
+                         item['downLoadUrl'],
+                         item['mvdesc'],
+                         item['downimgurl'],
+                         item['downdtitle'],
+                         item['mv_update_time']
+                         ))
+                    self.connect.commit()
+                    print('插入数据库，----------------------------插入完成-------------------------------------')
+            except Exception as error:
+                print('插入数据库，--------插入出错----------------',str(error))
+                return item

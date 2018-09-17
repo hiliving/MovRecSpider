@@ -22,3 +22,4 @@ class MovieItem(scrapy.Item):
     downimgurl = scrapy.Field()  # 电影海报图片
     mvdesc = scrapy.Field()  # 电影的详情介绍
     downdtitle = scrapy.Field()  # 下载的电影的标题
+    mv_update_time = scrapy.Field() # 电影的更新时间
