@@ -163,3 +163,35 @@ class MoviePipeline(object):
             except Exception as error:
                 print('插入数据库，--------插入出错----------------',str(error))
                 return item
+        elif spider.name=="homespider":
+            try:
+                # 插入数据
+                # 查重处理
+                self.cursor.execute(
+                    """select * from mov_update where downLoadName = %s""",
+                    item['downLoadName'])
+                # 是否有重复数据
+                repetition = self.cursor.fetchone()
+                # 重复
+                if repetition is not None:
+                    #结果返回，已存在，则不插入
+                    print('插入数据库，----------------------------已存在，则不插入-------------------------------------')
+                    pass
+                else:
+                        # 提交sql语句
+                    self.cursor.execute(
+                        """insert into mov_update(movClass, downLoadName, downLoadUrl, mvdesc,downimgurl,downdtitle,mv_update_time )
+                        value (%s, %s, %s, %s, %s, %s, %s)""",
+                        (item['movClass'],
+                         item['downLoadName'],
+                         item['downLoadUrl'],
+                         item['mvdesc'],
+                         item['downimgurl'],
+                         item['downdtitle'],
+                         item['mv_update_time']
+                         ))
+                    self.connect.commit()
+                    print('插入数据库，----------------------------插入完成-------------------------------------')
+            except Exception as error:
+                print('插入数据库，--------插入出错----------------',str(error))
+                return item

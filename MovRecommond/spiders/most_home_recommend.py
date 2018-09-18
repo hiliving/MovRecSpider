@@ -8,26 +8,20 @@ from MovRecommond.items import MovieItem
 
 # 电影港最新栏目下的资源
 class MostNewSpider(BaseSpider):
-    name = "dygangspider"
+    name = "homespider"
     allowed_domains = []
-    start_urls = ['http://www.dygang.net/ys/']
+    start_urls = ['http://www.dygang.net/']
 
     def parse(self, response):
         # 当前页面，从第一页到第4页
+        requestUrl = "http://www.dygang.net/"
+        yield scrapy.Request(url=requestUrl, callback=self.parse_mor)
 
-        for index in range(0, 5):
-            if index == 0:
-                requestUrl = "http://www.dygang.net/ys/"
-            else:
-                requestUrl = "http://www.dygang.net/ys/index_%s.htm" % (index + 1)
-            # yield
-            print('zhengzaipa',requestUrl)
-            yield scrapy.Request(url=requestUrl, callback=self.parse_mor)
 
     def parse_mor(self, response):
         # xpath('//tbody/tr/td//a[@class="classlinkclass"]/text()').extract() 电影名
         # response.xpath('//td[contains(@valign,"top")]/text()').extract() 简介
-        for item in response.xpath('//tbody/tr/td//a[@class="classlinkclass"]'):
+        for item in response.xpath("//div[@id='tab1_div_0']//a[@class='c2']"):
             # 爬取5页，左开右闭
             mvUrl = item.xpath("@href").extract_first()#详情页地址
             print('---------------------哈哈哈哈------------------------------',mvUrl)
