@@ -104,4 +104,3 @@ MYSQL_HOST = '123.207.150.253'
 MYSQL_DBNAME = 'movie'         #数据库名字，请修改
 MYSQL_USER = 'root'             #数据库账号，请修改
 MYSQL_PASSWD = 'root'         #数据库密码，请修改
-MYSQL_PORT = 3368               #数据库端口，在dbhelper中使用
