@@ -24,6 +24,7 @@ class MoviePipeline(object):
         # 连接数据库
         self.connect = pymysql.connect(
             host=settings.MYSQL_HOST,
+            port=settings.MYSQL_PORT,
             db=settings.MYSQL_DBNAME,
             user=settings.MYSQL_USER,
             passwd=settings.MYSQL_PASSWD,
