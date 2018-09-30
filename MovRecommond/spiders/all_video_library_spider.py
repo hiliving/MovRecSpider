@@ -13,15 +13,15 @@ class MostNewSpider(BaseSpider):
     start_urls = ['http://www.dygang.net/']
 
     def parse(self, response):
-        # 当前页面，从第一页到第4页
         for item in response.xpath("/html/body/table[3]/tbody/tr/td/a"):
 
             mvClass = item.xpath("text()").extract()
             mvUrl = item.xpath("@href").extract_first()
+
             if mvUrl =='/':
                 continue
             print("allvideolibrary",mvUrl)
-            for index in range(0, 2):
+            for index in range(0, 15):
                 # 不爬帮助页，跳出循环
                 if "help.html" in mvUrl:
                     break
@@ -54,14 +54,15 @@ class MostNewSpider(BaseSpider):
         # 详情介绍页面
         # 详情介绍页面
         mvClass = response.meta['mvclass']
-        mvname =  response.xpath('/html/body//td[contains(text(),"片名")]/text()').extract_first()
+        mvname =  response.xpath('//div[@class="title"]/a/text()').extract()
         mvdesc = response.xpath('//td[@id="dede_content"]/p/text()').extract()
         if len("".join(mvdesc).strip())==0:
             return
         # 海报是个集合，包含2-3个图，一般第一个是大海报，后面的是剧照
         mvPoster = response.xpath('//*[@id="dede_content"]/p/img/@src').extract()
         # 更新时间
-        mv_time =  response.xpath('/html/body//td[contains(text(),"发布时间")]/text()').extract_first()
+        mv_time =  response.xpath("//table[@width='91%']//tr[2]/td/text()").extract_first()
+
         if len(mv_time):
             time = re.search(r"(\d{4}-\d{1,2}-\d{1,2})", mv_time).group(0)
         else:
@@ -69,23 +70,30 @@ class MostNewSpider(BaseSpider):
         mvdtilte = "磁力下载"
 
         mgnetUrl = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/@href').extract()
+        mgnetName = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/text()').extract()
+
         ed2k = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"ed2k")]/@href').extract()
-        ed2k_name = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"ed2k")]/text()').extract()
+        ed2kName = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"ed2k")]/text()').extract()
+
+        print('名字的数量',len(ed2k),'----',len(ed2kName))
         # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
         downUrlList = []
+        downTitleList=[]
         # 如果磁力地址不为空
         if len(mgnetUrl):
             downUrlList.extend(mgnetUrl)
+            downTitleList.extend(mgnetName)
         else:
             if len(ed2k)==0:
                 return
         if len(ed2k):
             downUrlList.extend(ed2k)
+            downTitleList.extend(ed2kName)
 
         Item = MovieItem()
         Item['movClass'] = mvClass[0]
         Item['downLoadName'] = mvname
-        Item['downdtitle'] = str(mvdtilte)
+        Item['downdtitle'] = ','.join(downTitleList)
         Item['downimgurl'] = str(",".join(mvPoster))
         url = ','.join(downUrlList)
         Item['downLoadUrl'] = url

@@ -4,7 +4,7 @@ import re
 import scrapy
 from scrapy.spider import BaseSpider
 from MovRecommond.items import MovieItem
-
+import time
 
 # 电影港最新栏目下的资源
 class MostNewSpider(BaseSpider):
@@ -33,19 +33,14 @@ class MostNewSpider(BaseSpider):
     # 解析并保存进数据库，这里为了方便，用工具类封装了一下，便于其他爬虫用此方法
     def parse_detail(self,response):
         # 详情介绍页面
-        # 详情介绍页面
-        mvname =  response.xpath("/html/body//td[contains(text(),'片名')]/text()").extract_first()
+        mvname = response.xpath("//td[@class ='table-title']/div/a/text()").extract_first()
         mvdesc = response.xpath('//td[@id="dede_content"]/p/text()').extract()
         if len("".join(mvdesc).strip())==0:
             return
         # 海报是个集合，包含2-3个图，一般第一个是大海报，后面的是剧照
         mvPoster = response.xpath('//*[@id="dede_content"]/p/img/@src').extract()
-        # 更新时间
-        mv_time =  response.xpath('/html/body//td[contains(text(),"发布时间")]/text()').extract_first()
-        if len(mv_time):
-            time = re.search(r"(\d{4}-\d{1,2}-\d{1,2})", mv_time).group(0)
-        else:
-            time = "2018-07-5"
+
+        mvTime = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         mvdtilte = "磁力下载"
 
         mgnetUrl = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/@href').extract()
@@ -70,7 +65,7 @@ class MostNewSpider(BaseSpider):
         url = ','.join(downUrlList)
         Item['downLoadUrl'] = url
         Item['mvdesc'] ="".join(mvdesc).strip()
-        Item['mv_update_time'] = time
+        Item['mv_update_time'] = mvTime
         print('---------------save',downUrlList)
         yield Item
         # yield

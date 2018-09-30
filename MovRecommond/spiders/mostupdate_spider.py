@@ -40,14 +40,14 @@ class MostNewSpider(BaseSpider):
     def parse_detail(self,response):
         # 详情介绍页面
         # 详情介绍页面
-        mvname =  response.xpath("/html/body//td[contains(text(),'片名')]/text()").extract_first()
+        mvname = response.xpath("//td[@class ='table-title']/div/a/text()").extract_first()
         mvdesc = response.xpath('//td[@id="dede_content"]/p/text()').extract()
         if len("".join(mvdesc).strip())==0:
             return
         # 海报是个集合，包含2-3个图，一般第一个是大海报，后面的是剧照
         mvPoster = response.xpath('//*[@id="dede_content"]/p/img/@src').extract()
         # 更新时间
-        mv_time =  response.xpath('/html/body//td[contains(text(),"发布时间")]/text()').extract_first()
+        mv_time =  response.xpath("//td[@width='132']//td/text()").extract()
         if len(mv_time):
             time = re.search(r"(\d{4}-\d{1,2}-\d{1,2})", mv_time).group(0)
         else:
