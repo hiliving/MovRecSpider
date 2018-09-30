@@ -13,7 +13,10 @@ class MostNewSpider(BaseSpider):
     start_urls = ['http://www.dygang.net/']
 
     def parse(self, response):
-        for item in response.xpath("/html/body/table[3]/tbody/tr/td/a"):
+        head = response.xpath("/html/body/table[3]/tbody/tr/td/a")
+        head.pop()
+        head.pop(0)
+        for item in head:
 
             mvClass = item.xpath("text()").extract()
             mvUrl = item.xpath("@href").extract_first()
@@ -28,7 +31,7 @@ class MostNewSpider(BaseSpider):
                 if index==0:
                     requestUrl = mvUrl
                 else:
-                    requestUrl = "%sindex_%s.htm/" % (mvUrl,index + 1)
+                    requestUrl = "%sindex_%s.htm" % (mvUrl,index + 1)
                 # yield
                 print('zhengzaipa',requestUrl)
                 # yield
@@ -72,8 +75,8 @@ class MostNewSpider(BaseSpider):
         mgnetUrl = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/@href').extract()
         mgnetName = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/text()').extract()
 
-        ed2k = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"ed2k")]/@href').extract()
-        ed2kName = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"ed2k")]/text()').extract()
+        ed2k = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/@href').extract()
+        ed2kName = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/text()').extract()
 
         print('名字的数量',len(ed2k),'----',len(ed2kName))
         # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
