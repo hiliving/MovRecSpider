@@ -78,7 +78,6 @@ class MostNewSpider(BaseSpider):
         ed2k = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/@href').extract()
         ed2kName = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/text()').extract()
 
-        print('名字的数量',len(ed2k),'----',len(ed2kName))
         # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
         downUrlList = []
         downTitleList=[]

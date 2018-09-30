@@ -40,43 +40,47 @@ class MostNewSpider(BaseSpider):
     def parse_detail(self,response):
         # 详情介绍页面
         # 详情介绍页面
-        mvname = response.xpath("//td[@class ='table-title']/div/a/text()").extract_first()
+        mvname = response.xpath('//div[@class="title"]/a/text()').extract()
         mvdesc = response.xpath('//td[@id="dede_content"]/p/text()').extract()
         if len("".join(mvdesc).strip())==0:
             return
         # 海报是个集合，包含2-3个图，一般第一个是大海报，后面的是剧照
         mvPoster = response.xpath('//*[@id="dede_content"]/p/img/@src').extract()
         # 更新时间
-        mv_time =  response.xpath("//td[@width='132']//td/text()").extract()
+        mv_time =  response.xpath("//table[@width='91%']//tr[2]/td/text()").extract_first()
         if len(mv_time):
             time = re.search(r"(\d{4}-\d{1,2}-\d{1,2})", mv_time).group(0)
         else:
             time = "2018-07-5"
-        mvdtilte = "磁力下载"
 
         mgnetUrl = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/@href').extract()
-        ed2k = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"ed2k")]/@href').extract()
-        ed2k_name = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"ed2k")]/text()').extract()
+        mgnetName = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/text()').extract()
+
+        ed2k = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/@href').extract()
+        ed2kName = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/text()').extract()
         # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
         downUrlList = []
+        downTitleList = []
         # 如果磁力地址不为空
         if len(mgnetUrl):
             downUrlList.extend(mgnetUrl)
+            downTitleList.extend(mgnetName)
         else:
-            if len(ed2k)==0:
+            if len(ed2k) == 0:
                 return
         if len(ed2k):
             downUrlList.extend(ed2k)
+            downTitleList.extend(ed2kName)
 
         Item = MovieItem()
-        Item['movClass'] = '最新电影'
+        Item['movClass'] = "最新更新"
         Item['downLoadName'] = mvname
-        Item['downdtitle'] = str(mvdtilte)
+        Item['downdtitle'] = ','.join(downTitleList)
         Item['downimgurl'] = str(",".join(mvPoster))
         url = ','.join(downUrlList)
         Item['downLoadUrl'] = url
-        Item['mvdesc'] ="".join(mvdesc).strip()
+        Item['mvdesc'] = "".join(mvdesc).strip()
         Item['mv_update_time'] = time
-        print('---------------save',downUrlList)
+        print('---------------save', downUrlList)
         yield Item
         # yield
