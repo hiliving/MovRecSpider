@@ -19,21 +19,16 @@ class MostNewSpider(BaseSpider):
 
 
     def parse_mor(self, response):
-        # xpath('//tbody/tr/td//a[@class="classlinkclass"]/text()').extract() 电影名
-        # response.xpath('//td[contains(@valign,"top")]/text()').extract() 简介
         for item in response.xpath("//div[@id='tab1_div_0']//a[@class='c2']"):
-            # 爬取5页，左开右闭
             mvUrl = item.xpath("@href").extract_first()#详情页地址
             print('---------------------哈哈哈哈------------------------------',mvUrl)
             yield scrapy.Request(url=mvUrl, callback=self.parse_detail)
-            # yield
 
-
-            # yield
     # 解析并保存进数据库，这里为了方便，用工具类封装了一下，便于其他爬虫用此方法
     def parse_detail(self,response):
         # 详情介绍页面
-        mvname = response.xpath("//td[@class ='table-title']/div/a/text()").extract_first()
+        response.xpath('//div[@class="title"]/a/text()').extract()
+        mvname = response.xpath('//div[@class="title"]/a/text()').extract()
         mvdesc = response.xpath('//td[@id="dede_content"]/p/text()').extract()
         if len("".join(mvdesc).strip())==0:
             return

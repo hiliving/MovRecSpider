@@ -24,7 +24,7 @@ class MostNewSpider(BaseSpider):
             if mvUrl =='/':
                 continue
             print("allvideolibrary",mvUrl)
-            for index in range(0, 15):
+            for index in range(0, 185):
                 # 不爬帮助页，跳出循环
                 if "help.html" in mvUrl:
                     break
