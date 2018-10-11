@@ -15,7 +15,7 @@ class MostNewSpider(BaseSpider):
     def parse(self, response):
         # 当前页面，从第一页到第4页
 
-        for index in range(0, 1):
+        for index in range(0, 10):
             if index == 0:
                 requestUrl = "http://www.dygang.net/dyzt/"
             else:
