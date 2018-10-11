@@ -55,11 +55,12 @@ class MostNewSpider(BaseSpider):
         # 更新时间，由于是专题，此字段没有意义
         mv_time = "2018-10-28"
 
-        mgnetUrl = response.xpath("//div[@class='box']//a[contains(@href,'magnet')]/@href").extract_first()
-        mgnetName = response.xpath("//div[@class='box']//a[contains(@href,'magnet')]/text()").extract_first()
+        mgnetUrl = response.xpath("//div[@class='box']//a[contains(@href,'magnet')]/@href").extract()
 
-        ed2k = response.xpath("//div[@class='box']//a[contains(@href,'ed2k')]/@href").extract_first()
-        ed2kName = response.xpath("//div[@class='box']//a[contains(@href,'ed2k')]/text()").extract_first()
+        mgnetName = response.xpath("//div[@class='box']//a[contains(@href,'magnet')]/text()").extract()
+
+        ed2k = response.xpath("//div[@class='box']//a[contains(@href,'ed2k')]/@href").extract()
+        ed2kName = response.xpath("//div[@class='box']//a[contains(@href,'ed2k')]/text()").extract()
         # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
         downUrlList = []
         downTitleList = []
