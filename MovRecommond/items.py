@@ -17,6 +17,8 @@ class MovieItem(scrapy.Item):
     mvName = scrapy.Field()
     mvUrl = scrapy.Field()
 
+    playUrl = scrapy.Field() #在线播放地址
+    playName = scrapy.Field() #在线播放名称
     downLoadUrl = scrapy.Field()  # 下载地址
     downLoadName = scrapy.Field()  # 下载电影的名称
     downimgurl = scrapy.Field()  # 电影海报图片
