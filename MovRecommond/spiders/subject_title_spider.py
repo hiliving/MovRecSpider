@@ -8,7 +8,7 @@ from MovRecommond.items import MovieItem
 
 # 电影港最新栏目下的资源
 class MostNewSpider(BaseSpider):
-    name = "subject_spider"
+    name = "subject_title_spider"
     allowed_domains = []
     start_urls = ['http://www.dygang.net/dyzt/']
 
@@ -27,7 +27,6 @@ class MostNewSpider(BaseSpider):
     def parse_mor(self, response):
         for item in response.xpath('//tbody/tr/td//a[@class="classlinkclass"]'):
             mvUrl = item.xpath("@href").extract_first()#专题详情页地址
-            # mvUrl = "http://www.dygang.net/dyzt/20160922/35527.htm"#专题详情页地址
             mvName = item.xpath("text()").extract()#专题详情页标题
             print('---------------------哈哈哈哈2------------------------------',mvUrl)
             yield scrapy.Request(url=mvUrl,meta={"mvclass":mvName},callback=self.parse_subject_page)
@@ -37,17 +36,12 @@ class MostNewSpider(BaseSpider):
         mvClass = response.meta['mvclass']
         for item in response.xpath('//td[@bgcolor="#ffffbb"]//a'):
             mvUrl = item.xpath("@href").extract_first()
-            if "searchid" in mvUrl:
-                continue
             print('---------------------哈哈哈哈------------------------------', mvUrl)
-
             if "dygang" in mvUrl:
                 yield scrapy.Request(url=mvUrl,meta={"mvclass":mvClass},callback=self.parse_dygang_detail)
             elif "66ys" in mvUrl:
                 yield scrapy.Request(url=mvUrl,meta={"mvclass":mvClass},callback=self.parse_66ys_detail)
-            elif "6vhao.net" in mvUrl:
-                yield scrapy.Request(url=mvUrl, meta={"mvclass": mvClass}, callback=self.parse_dy6_detail)
-            elif "6vhao.com" in mvUrl:
+            else:
                 yield scrapy.Request(url=mvUrl,meta={"mvclass":mvClass},callback=self.parse_detail)
 
     # 解析并保存进数据库，这里为了方便，用工具类封装了一下，便于其他爬虫用此方法
@@ -187,59 +181,6 @@ class MostNewSpider(BaseSpider):
         if len(ed2k):
             downUrlList.extend(ed2k)
             downTitleList.extend(ed2kName)
-
-        Item = MovieItem()
-        Item['movClass'] = mvClass[0]
-        Item['downLoadName'] = mvname
-        Item['downdtitle'] = ','.join(downTitleList)
-        Item['downimgurl'] = str(",".join(mvPoster))
-        url = ','.join(downUrlList)
-        Item['downLoadUrl'] = url
-        Item['mvdesc'] = "".join(mvdesc).strip()
-        Item['mv_update_time'] = time
-        print('---------------save', downUrlList)
-        yield Item
-    def parse_dy6_detail(self,response):
-
-        # 详情介绍页面
-        mvClass = response.meta['mvclass']
-        mvname = response.xpath("//div[@class='contentinfo']/h1/a/text()").extract_first()
-        mvdesc = response.xpath('//div[@id="text"]/p/text()').extract()
-        if len("".join(mvdesc).strip()) == 0:
-            return
-        # 海报是个集合，包含2-3个图，一般第一个是大海报，后面的是剧照
-        mvPoster = response.xpath("//div[@id='text']//img/@src").extract()
-        # 更新时间
-        mv_time = response.xpath("//table[@width='91%']//tr[2]/td/text()").extract_first()
-
-        if mv_time is None:
-            time = "2018-07-5"
-        else:
-            time = "2018-07-5"
-        mvdtilte = "磁力下载"
-
-        mgnetUrl = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/@href').extract()
-        mgnetName = response.xpath('//*[@id="dede_content"]/table//a[contains(@href,"magnet")]/text()').extract()
-
-        ed2k = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"ed2k")]/@href').extract()
-        ed2kName = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"ed2k")]/text()').extract()
-
-        ftp = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"ftp")]/@href').extract()
-        ftpName = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"ftp")]/text()').extract()
-
-        # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
-        downUrlList = []
-        downTitleList = []
-        # 如果磁力地址不为空
-        if len(mgnetUrl):
-            downUrlList.extend(mgnetUrl)
-            downTitleList.extend(mgnetName)
-        if len(ed2k):
-            downUrlList.extend(ed2k)
-            downTitleList.extend(ed2kName)
-        if len(ftp):
-            downUrlList.extend(ftp)
-            downTitleList.extend(ftpName)
 
         Item = MovieItem()
         Item['movClass'] = mvClass[0]
