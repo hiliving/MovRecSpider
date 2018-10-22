@@ -49,6 +49,10 @@ class MostNewSpider(BaseSpider):
                 yield scrapy.Request(url=mvUrl, meta={"mvclass": mvClass}, callback=self.parse_dy6_detail)
             elif "6vhao.com" in mvUrl:
                 yield scrapy.Request(url=mvUrl,meta={"mvclass":mvClass},callback=self.parse_detail)
+            elif "pp63.com" in mvUrl:
+                yield scrapy.Request(url=mvUrl,meta={"mvclass":mvClass},callback=self.parse_detail)
+            elif "hao6v.com" in mvUrl:
+                yield scrapy.Request(url=mvUrl,meta={"mvclass":mvClass},callback=self.parse_detail)
 
     # 解析并保存进数据库，这里为了方便，用工具类封装了一下，便于其他爬虫用此方法
     def parse_detail(self,response):
@@ -72,6 +76,19 @@ class MostNewSpider(BaseSpider):
 
         ed2k = response.xpath("//div[@class='box']//a[contains(@href,'ed2k')]/@href").extract()
         ed2kName = response.xpath("//div[@class='box']//a[contains(@href,'ed2k')]/text()").extract()
+
+        ftp = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"ftp")]/@href').extract()
+        ftpName = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"ftp")]/text()').extract()
+
+
+        bt = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,".torrent")]/@href').extract()
+        btName = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,".torrent")]/text()').extract()
+
+        thunder = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"thunder")]/@href').extract()
+        thunderName = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"thunder")]/text()').extract()
+
+
+
         # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
         downUrlList = []
         downTitleList = []
@@ -80,12 +97,20 @@ class MostNewSpider(BaseSpider):
         if len(mgnetUrl):
             downUrlList.extend(mgnetUrl)
             downTitleList.extend(mgnetName)
-        else:
-            if len(ed2k) == 0:
-                return
         if len(ed2k):
             downUrlList.extend(ed2k)
             downTitleList.extend(ed2kName)
+        if len(ftp):
+            downUrlList.extend(ftp)
+            downTitleList.extend(ftpName)
+        if len(bt):
+            downUrlList.extend(ftp)
+            downTitleList.extend(btName)
+        if len(thunder):
+            downUrlList.extend(thunder)
+            downTitleList.extend(thunderName)
+
+
         Item = MovieItem()
         Item['movClass'] = mvClass
         Item['downLoadName'] = mvname
@@ -124,6 +149,9 @@ class MostNewSpider(BaseSpider):
         ed2k = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/@href').extract()
         ed2kName = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/text()').extract()
 
+        ftp = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ftp")]/@href').extract()
+        ftpName = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ftp")]/text()').extract()
+
         # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
         downUrlList = []
         downTitleList = []
@@ -131,12 +159,12 @@ class MostNewSpider(BaseSpider):
         if len(mgnetUrl):
             downUrlList.extend(mgnetUrl)
             downTitleList.extend(mgnetName)
-        else:
-            if len(ed2k) == 0:
-                return
         if len(ed2k):
             downUrlList.extend(ed2k)
             downTitleList.extend(ed2kName)
+        if len(ftp):
+            downUrlList.extend(ftp)
+            downTitleList.extend(ftpName)
 
         Item = MovieItem()
         Item['movClass'] = mvClass[0]
@@ -174,6 +202,8 @@ class MostNewSpider(BaseSpider):
         ed2k = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/@href').extract()
         ed2kName = response.xpath('//td[@id="dede_content"]//a[contains(@href,"ed2k")]/text()').extract()
 
+        ftp = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"ftp")]/@href').extract()
+        ftpName = response.xpath('//td[@bgcolor="#ffffbb"]/a[contains(@href,"ftp")]/text()').extract()
         # 下载地址集合，第一个元素是磁力链，后面的是ftp，针对剧集类，磁力可能为空，ftp的是个集合
         downUrlList = []
         downTitleList = []
@@ -181,12 +211,14 @@ class MostNewSpider(BaseSpider):
         if len(mgnetUrl):
             downUrlList.extend(mgnetUrl)
             downTitleList.extend(mgnetName)
-        else:
-            if len(ed2k) == 0:
-                return
+
         if len(ed2k):
             downUrlList.extend(ed2k)
             downTitleList.extend(ed2kName)
+
+        if len(ftp):
+            downUrlList.extend(ftp)
+            downTitleList.extend(ftpName)
 
         Item = MovieItem()
         Item['movClass'] = mvClass[0]
