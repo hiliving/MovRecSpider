@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-
+import hashlib
 import scrapy
 from scrapy.spider import BaseSpider
 from MovRecommond.items import MovieItem
@@ -24,14 +24,15 @@ class MostNewSpider(BaseSpider):
             if mvUrl =='/':
                 continue
             print("allvideolibrary",mvUrl)
-            for index in range(0, 185):
+            for index in range(0,2):
                 # 不爬帮助页，跳出循环
                 if "help.html" in mvUrl:
                     break
                 if index==0:
-                    requestUrl = mvUrl
+                    requestUrl = "%sindex.htm" % (mvUrl)
                 else:
                     requestUrl = "%sindex_%s.htm" % (mvUrl,index + 1)
+                    
                 # yield
                 print('zhengzaipa',requestUrl)
                 # yield
@@ -47,7 +48,7 @@ class MostNewSpider(BaseSpider):
             # 爬取5页，左开右闭
             mvUrl = item.xpath("@href").extract_first()#详情页地址
             print('---------------------哈哈哈哈------------------------------',mvClass)
-            yield scrapy.Request(url=mvUrl, meta={"mvclass":mvClass},callback=self.parse_detail)
+            yield scrapy.Request(url=mvUrl, meta={"mvclass":mvClass,"mvUrl":mvUrl},callback=self.parse_detail)
             # yield
 
 
@@ -55,8 +56,11 @@ class MostNewSpider(BaseSpider):
     # 解析并保存进数据库，这里为了方便，用工具类封装了一下，便于其他爬虫用此方法
     def parse_detail(self,response):
         # 详情介绍页面
-        # 详情介绍页面
         mvClass = response.meta['mvclass']
+        # 记录剧集的唯一的key,根据这个判断是不是同一部电影，因为美剧涉及更新，更新时，标题也会改变，所以爬虫不能以标题识别，需要这个识别
+        mvUrl = response.meta['mvUrl']
+        mvId = hashlib.md5(mvUrl.encode(encoding='UTF-8')).hexdigest()
+        print('---------------------mvid-------------', mvId)
         mvname =  response.xpath('//div[@class="title"]/a/text()').extract()
         mvdesc = response.xpath('//td[@id="dede_content"]/p/text()').extract()
         if len("".join(mvdesc).strip())==0:
@@ -101,6 +105,7 @@ class MostNewSpider(BaseSpider):
         Item['downLoadUrl'] = url
         Item['mvdesc'] ="".join(mvdesc).strip()
         Item['mv_update_time'] = time
+        Item['mv_md5_id'] = mvId
         print('---------------save',downUrlList)
         yield Item
         # yield

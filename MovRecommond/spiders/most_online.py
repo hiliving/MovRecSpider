@@ -22,7 +22,7 @@ class MostNewSpider(BaseSpider):
         for item in listHead:
 
             requestUrl = item.xpath("a/@href").extract_first()
-            for index in range(0,3):
+            for index in range(0,160):
                 if index==0:
                     mvUrl = requestUrl
                     print("----------url-------------", mvUrl)
@@ -41,21 +41,18 @@ class MostNewSpider(BaseSpider):
         currentUrl = response.meta['currentUrl']
         mvClass = response.meta['mvClass']
 
-        for item in response.xpath("//div[@class='mainleft']/ul/li"):
-            if item==0:
-                mvUrl = currentUrl
-                yield scrapy.Request(url=mvUrl, meta={"mvClass": mvClass}, callback=self.parse_detail)
+        for item in response.xpath("//div[@class='thumbnail']"):
+            # 爬取5页，左开右闭
+            mvUrl = item.xpath("a/@href").extract_first()
+            print("---------------------gggg------------------------------", mvUrl)
+            if "http" in mvUrl:
+                print('---')
             else:
-                # 爬取5页，左开右闭
-                mvPoster = item.xpath("//a[@class='zoom']/img/@src").extract_first()#详情页地址
-                mvUrl = item.xpath("//a[@class='zoom']/@href").extract_first()
-                if "http" in mvUrl:
-                    print("---------------------gggg------------------------------",mvUrl)
-                    yield scrapy.Request(url=mvUrl, meta={"mvClass": mvClass}, callback=self.parse_detail)
-                else:
-                    mvUrl = "https://www.66s.cc/"+mvUrl
-                    print("---------------------gggg------------------------------",mvUrl)
-                    yield scrapy.Request(url=mvUrl, meta={"mvClass":mvClass},callback=self.parse_detail)
+                mvUrl = "https://www.66s.cc" + mvUrl
+                print("---------------------gggg22------------------------------", mvUrl)
+            yield scrapy.Request(url=mvUrl, meta={"mvClass": mvClass}, callback=self.parse_detail)
+            # yield
+
 
     # 解析并保存进数据库，这里为了方便，用工具类封装了一下，便于其他爬虫用此方法
     def parse_detail(self,response):
@@ -103,6 +100,10 @@ class MostNewSpider(BaseSpider):
         Item['mv_update_time'] = mvTime
         Item['playUrl'] =','.join(mvPlayUrl)
         Item['playName'] =','.join(mvPlayName)
-        print('---------------save',','.join(mvPlayUrl),'-------',','.join(mvPlayName))
-        yield Item
-        # yield
+        if len(mvPlayUrl)==0:
+            print("---------------","无在线播放地址")
+            pass
+            yield
+        else:
+            print('---------------save',','.join(mvPlayUrl),'-------',','.join(mvPlayName))
+            yield Item

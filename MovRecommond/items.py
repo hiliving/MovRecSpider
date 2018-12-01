@@ -17,11 +17,10 @@ class MovieItem(scrapy.Item):
     mvName = scrapy.Field()
     mvUrl = scrapy.Field()
 
-    playUrl = scrapy.Field() #在线播放地址
-    playName = scrapy.Field() #在线播放名称
     downLoadUrl = scrapy.Field()  # 下载地址
     downLoadName = scrapy.Field()  # 下载电影的名称
     downimgurl = scrapy.Field()  # 电影海报图片
     mvdesc = scrapy.Field()  # 电影的详情介绍
     downdtitle = scrapy.Field()  # 下载的电影的标题
     mv_update_time = scrapy.Field() # 电影的更新时间
+    mv_md5_id = scrapy.Field() # 电影唯一ID

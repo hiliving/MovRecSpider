@@ -1,6 +1,6 @@
-a = ['dd','ss','bb','ssa','ffa']
+# -*- coding: utf-8 -*-
+import hashlib
 
-# del a[0]
-a.pop()
-a.pop(0)
-print(a)
+mvUrl="https://www.cnblogs.com/xunbu7/p/8074417.html"
+mvId = hashlib.md5(mvUrl.encode(encoding='UTF-8')).hexdigest()
+print(mvId)
